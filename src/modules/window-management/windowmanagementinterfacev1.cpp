@@ -58,6 +58,10 @@ WindowManagementInterfaceV1::WindowManagementInterfaceV1(QObject *parent)
     , d(new WindowManagementInterfaceV1Private(this))
 {
     qRegisterMetaType<DesktopState>("DesktopState");
+
+    connect(this, &WindowManagementInterfaceV1::requestShowDesktop, this, [this](uint32_t state) {
+        setDesktopState(static_cast<DesktopState>(state));
+    });
 }
 
 WindowManagementInterfaceV1::~WindowManagementInterfaceV1() = default;
