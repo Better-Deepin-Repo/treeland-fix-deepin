@@ -96,7 +96,7 @@ Q_SIGNALS:
 protected:
     QW_NAMESPACE::qw_buffer *beginRender(const QSize &pixelSize, qreal devicePixelRatio,
                                         uint32_t format, RenderFlags flags = {});
-    void render(int sourceIndex, const QMatrix4x4 &renderMatrix,
+    bool render(int sourceIndex, const QMatrix4x4 &renderMatrix,
                 const QRectF &sourceRect = {}, const QRectF &targetRect = {},
                 bool preserveColorContents = false);
     void endRender();
@@ -117,6 +117,9 @@ private:
     Q_SLOT void invalidateSceneGraph();
     void releaseResources() override;
     void cleanTextureProvider();
+    bool isPrimaryOutputRendererForVulkan() const;
+    void retireSwapchain(QW_NAMESPACE::qw_swapchain *swapchain, bool defer);
+    void cleanupRetiredResources(bool force = false);
 
     inline bool isRootItem(const QQuickItem *source) const {
         return nullptr == source;
@@ -130,6 +133,7 @@ private:
     QW_NAMESPACE::qw_swapchain *m_swapchain = nullptr;
     WRenderHelper *m_renderHelper = nullptr;
     QPointer<QW_NAMESPACE::qw_buffer> m_lastBuffer;
+    QList<QW_NAMESPACE::qw_swapchain *> m_retiredSwapchains;
 
     struct RenderState {
         RenderFlags flags;
@@ -142,7 +146,11 @@ private:
         std::unique_ptr<QW_NAMESPACE::qw_buffer, QW_NAMESPACE::qw_buffer::unlocker> buffer;
         QQuickRenderTarget renderTarget;
         QSGRenderTarget sgRenderTarget;
+        QQuickRenderTarget preserveRenderTarget;
+        QSGRenderTarget preserveSgRenderTarget;
+        QSGRenderTarget activeSgRenderTarget;
         QRegion dirty;
+        bool renderBufferReleasedForCache = false;
     } state;
 
     QPointer<WOutput> m_output;
