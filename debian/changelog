@@ -1,4 +1,4 @@
-treeland (0.8.15) unstable; urgency=medium
+treeland (0.8.15.1) unstable; urgency=medium
 
   * fix(lockscreen): accept numpad Enter key for password submission
   * fix(seat): clear keyboard focus for all seats on internal QML focus
