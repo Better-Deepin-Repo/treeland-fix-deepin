@@ -384,6 +384,9 @@ class Compositor1Adaptor: public QDBusAbstractAdaptor
                 "    </method>\n"
                 "    <signal name=\"SessionChanged\"/>\n"
                 "    <signal name=\"XWaylandAuthChanged\"/>\n"
+                "    <signal name=\"InputMethodChanged\">\n"
+                "      <arg type=\"b\" name=\"connected\"/>\n"
+                "    </signal>\n"
                 "  </interface>\n"
                 "")
 public:
@@ -411,6 +414,7 @@ public Q_SLOTS: // METHODS
 Q_SIGNALS: // SIGNALS
     void SessionChanged();
     void XWaylandAuthChanged();
+    void InputMethodChanged(bool connected);
 };
 
 Treeland::Treeland()
