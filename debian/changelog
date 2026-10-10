@@ -1,4 +1,4 @@
-treeland (0.11.0) unstable; urgency=medium
+treeland (0.11.0.1) unstable; urgency=medium
 
   * fix(session): store logind session id as string to avoid collision
   * fix(input-method): forward empty preedit to clear composing
