@@ -24,7 +24,7 @@ Wayland 线上请求与事件；本文档规定发出请求后，测试必须观
 | 协议 | 覆盖等级 | 主要生产结果 |
 | --- | --- | --- |
 | [测试框架架构](framework/README.md) | 基础设施 | runner、fixture、C client、生产状态桥接与 E/V 断言边界 |
-| [app-id-resolver-v1](treeland-app-id-resolver-v1/README.md) | I / E | resolver pidfd 应答；返回 app-id 转换真实 splash wrapper 为 xdg window |
+| [app-id-resolver-v2](treeland-app-id-resolver-v2/README.md) | I / E | resolver pidfd 应答；返回 app-id 转换真实 splash wrapper 为 xdg window |
 | [capture-unstable-v1](treeland-capture-unstable-v1/README.md) | E / V / P | 真实窗口选择、frame copy 与目标 buffer 像素；无 source 错误 |
 | [compositor-action-v1](treeland-compositor-action-v1/README.md) | E / P | trigger 路由到真实 Workspace 切换与 show-desktop 状态；zoom/未知动作被忽略不断连 |
 | [dde-shell-v1](treeland-dde-shell-v1/README.md) | E / P | mapped wrapper 的 DDE 元数据、锁屏；window picker 功能已移除 |
@@ -41,8 +41,8 @@ Wayland 线上请求与事件；本文档规定发出请求后，测试必须观
 | [decoration-unstable-v1](treeland-decoration-unstable-v1/README.md) | E | mapped toplevel 的 `set_corner_radius` 回读真实 `SurfaceWrapper::radius()` | shadow、border、titlebar 和协议错误路径 |
 | [remote-subsurface-unstable-v1](treeland-remote-subsurface-unstable-v1/README.md) | E / P | token 导出、真实 Remote `WSubsurface` 的父子关系、位置与层级；`parent_rejected` / `invalid_sibling` | 跨 client、循环 parent、映射生命周期与 sibling 间排序 |
 | [prelaunch-splash-v2](treeland-prelaunch-splash-v2/README.md) | I / E | splash 请求/关闭信号；生产 splash wrapper 创建、加入 workspace 与销毁 |
-| [screensaver-v1](treeland-screensaver-v1/README.md) | E / P | 真实 ext-idle 抑制生命周期 |
-| [shortcut-manager-v2](treeland-shortcut-manager-v2/README.md) | E / P | 聚焦窗口捕获与快捷键激活 |
+| [screensaver-v2](treeland-screensaver-v2/README.md) | E / P | 真实 ext-idle 抑制生命周期 |
+| [shortcut-manager-v3](treeland-shortcut-manager-v3/README.md) | E / P | 聚焦窗口捕获与快捷键激活 |
 | [virtual-output-manager-v1](treeland-virtual-output-manager-v1/README.md) | P / E | 虚拟输出资源校验；两个既有输出的镜像/恢复 |
 | [wallpaper-color-v1](treeland-wallpaper-color-v1/README.md) | I | 订阅、去重与颜色通知 |
 | [wallpaper-manager-unstable-v1](treeland-wallpaper-manager-unstable-v1/README.md) | I / P | 真实输出上的壁纸资源生命周期 |
@@ -73,6 +73,7 @@ xdg-shell 由共享 xdg-toplevel 夹具覆盖（多个 toplevel 测试复用）�
 | 协议 | 覆盖等级 | 主要生产结果 |
 | --- | --- | --- |
 | [wayland-alpha-modifier-v1](wayland-alpha-modifier-v1/README.md) | E | 映射 toplevel + `set_multiplier`，回读真实 `wlr_alpha_modifier_surface_v1_state::multiplier` 与请求值一致 |
+| [ext-background-effect-v1](ext-background-effect-v1/README.md) | E / P | bind 下发 blur 能力位；`set_blur_region` 双缓冲流转（set/保持/NULL/重启用/destroy）回读真实 `SurfaceWrapper::blur()`（非空区域启用整面 blur）；重复关联触发 `background_effect_exists` |
 | [wayland-cursor-shape-v1](wayland-cursor-shape-v1/README.md) | E | 真实 `wl_pointer` 上 `set_shape`，回读真实 `wlr_cursor_shape_manager_v1::events.request_set_shape` 捕获的 shape 值与请求一致 |
 | [wayland-ext-data-control-v1](wayland-ext-data-control-v1/README.md) | E | 创建 offer 并 `set_selection` 后回读真实 `wlr_seat::selection_source` 非空 |
 | [wayland-ext-foreign-toplevel-list-v1](wayland-ext-foreign-toplevel-list-v1/README.md) | E | 映射 toplevel 后回读真实 `wlr_ext_foreign_toplevel_list_v1::toplevels` 列表非空 |
@@ -133,7 +134,7 @@ request stub 算作 request 覆盖；生成的 client-protocol 文件本身不�
 | remote-subsurface-unstable-v1 | 8 / 8 | token；真实 Remote `WSubsurface` 的父子关系、位置、Below 层级；`parent_rejected` / `invalid_sibling` | 跨 client、循环 parent、映射生命周期、sibling 间排序 |
 | prelaunch-splash-v2 | 3 / 3 | 创建、关闭；真实 splash wrapper 加入/离开 workspace | splash QML 最终可见性、纹理和像素 |
 | screensaver-v1 | 2 / 3 | 真实 ext-idle 被 inhibit/uninhibit 改变 | 显式 `destroy` request、实际锁屏 UI |
-| shortcut-manager-v2 | 6 / 9 | `commit_success`、`captured`、`activated`；真实 virtual keyboard 输入链 | swipe、hold、`unbind`、`commit_failure` 的业务分支；物理键盘 |
+| shortcut-manager-v3 | 6 / 9 | `bind_failure`、`captured`、`activated`；真实 virtual keyboard 输入链 | swipe、hold、`unbind` 的业务分支；物理键盘 |
 | virtual-output-manager-v1 | 5 / 5 | `outputs/error/virtual_output_list`；生产 copy output 创建与恢复 | 热插拔 successor、跨进程持久化、物理显示器内容一致性 |
 | wallpaper-color-v1 | 3 / 3 | `output_color` 订阅与去重 | 真实壁纸分析来源、壁纸应用后的 output 色彩变化 |
 | wallpaper-manager-unstable-v1 | 4 / 5 | `failed/changed`；`set_image_source` 与 wallpaper shell/output 关联 | `set_video_source`、实际映射/QML 接入、媒体解码失败、最终 output 像素 |
@@ -169,6 +170,7 @@ focus 到 `active` event 的链路；`ext-image-copy-capture-v1` 已验证 outpu
 | 协议 | E 级回读的生产对象 |
 | --- | --- |
 | `alpha-modifier-v1` | `wlr_alpha_modifier_surface_v1_state::multiplier` |
+| `ext-background-effect-v1` | `SurfaceWrapper::blur()` 随客户端 region 非空而启用（含双缓冲保持/NULL 移除/destroy 清除） |
 | `cursor-shape-v1` | `wlr_cursor_shape_manager_v1::events.request_set_shape` 捕获的 shape |
 | `ext-data-control-v1` | `wlr_seat::selection_source` 非空 |
 | `ext-foreign-toplevel-list-v1` | `wlr_ext_foreign_toplevel_list_v1::toplevels` 列表非空 |

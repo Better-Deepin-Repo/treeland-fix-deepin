@@ -14,6 +14,7 @@
 #include <QString>
 
 Q_MOC_INCLUDE(<woutputitem.h>)
+Q_MOC_INCLUDE("outputconfig.hpp")
 
 struct wlr_output;
 
@@ -101,6 +102,7 @@ public:
     qreal preferredScaleFactor(const QSize &pixelSize) const;
 
     OutputConfig* config() const;
+    QString uuid() const;
 
     void adjustToOutputBounds(QPointF &pos,
                               const QRectF &normalGeo,
@@ -174,7 +176,6 @@ private:
     WOutputItem *m_item;
     Output *m_proxy = nullptr;
     SurfaceFilterModel *minimizedSurfaces;
-    QPointer<QQuickItem> m_taskBar;
     QPointer<QQuickItem> m_debugMenuBar;
     WOutputViewport *m_outputViewport = nullptr;
 

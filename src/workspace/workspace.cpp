@@ -249,7 +249,9 @@ void Workspace::switchTo(int index, bool animated)
 
     auto oldCurrentIndex = currentIndex();
     setCurrentIndex(index);
-    WaylandServer::instance()->activateSurface(current()->latestActiveSurface());
+    // Browsing workspaces must keep keyboard focus in the multitask view.
+    if (WaylandServer::instance()->currentMode() != WaylandServer::CurrentMode::Multitaskview)
+        WaylandServer::instance()->activateSurface(current()->latestActiveSurface());
 
     if (animated) {
         createSwitcher();
@@ -465,11 +467,14 @@ void Workspace::doRemoveModel(int index)
     auto oldCurrent = this->current();
     auto oldCurrentIndex = this->currentIndex();
     auto model = this->modelAt(index);
+    // Move windows to the preceding workspace, or the next one when removing the first.
+    auto target = this->modelAt(index > 0 ? index - 1 : 1);
+    Q_ASSERT(target);
     m_models->removeObject(model);
 
     if (oldCurrent == model) {
         // current change, current index might change
-        doSetCurrentIndex(std::min(currentIndex(), count() - 1));
+        doSetCurrentIndex(m_models->objects().indexOf(target));
     } else {
         // current do not change, current index might change
         doSetCurrentIndex(m_models->objects().indexOf(oldCurrent));
@@ -482,11 +487,12 @@ void Workspace::doRemoveModel(int index)
     const auto tmp = model->surfaces();
     for (auto s : tmp) {
         model->removeSurface(s);
-        current->addSurface(s);
+        target->addSurface(s);
         if (s->hasActiveCapability() && !s->showOnAllWorkspace())
-            current->pushActivedSurface(s);
+            target->pushActivedSurface(s);
     }
-    WaylandServer::instance()->activateSurface(current->latestActiveSurface());
+    if (WaylandServer::instance()->currentMode() != WaylandServer::CurrentMode::Multitaskview)
+        WaylandServer::instance()->activateSurface(current->latestActiveSurface());
 
     if (m_switcher) {
         m_switcher->deleteLater();

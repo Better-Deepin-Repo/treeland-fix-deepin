@@ -186,11 +186,6 @@ Output::~Output()
         m_hardwareLayersOfSourceOutput.clear();
     }
 
-    if (m_taskBar) {
-        delete m_taskBar;
-        m_taskBar = nullptr;
-    }
-
     if (m_debugMenuBar) {
         delete m_debugMenuBar;
         m_debugMenuBar = nullptr;
@@ -1154,6 +1149,11 @@ QRectF Output::tileGeometry(SurfaceWrapper::TileMode mode) const
 OutputConfig *Output::config() const
 {
     return m_config;
+}
+
+QString Output::uuid() const
+{
+    return m_config->uuid();
 }
 
 void Output::applyOutputColorConfig()

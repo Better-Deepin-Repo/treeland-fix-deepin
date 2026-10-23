@@ -6,7 +6,8 @@
 #include "seatuserconfig.hpp"
 #include "treelandconfig.hpp"
 #include "core/waylandserver.h"
-#include "inputdevice.h"
+#include "libinputconfig.h"
+#include "gesturemanager.h"
 #include "common/treelandlogging.h"
 #include "modules/input-manager/inputmanagerinterfacev1.h"
 #include "seat/seatmanager.h"
@@ -98,7 +99,7 @@ void InputManager::setupSeat(WSeat *seat)
     if (auto *cursor = seat->cursor())
         cursor->setScrollFactor(config->pointerScrollFactor());
 
-    InputDevice::instance()->setHoldTimeout(config->touchpadHoldTimeoutMs());
+    GestureManager::instance()->setHoldTimeout(config->touchpadHoldTimeoutMs());
 
     applyXkbConfigForSeat(seat);
 

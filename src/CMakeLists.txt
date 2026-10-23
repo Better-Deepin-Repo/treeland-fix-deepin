@@ -115,6 +115,11 @@ set_target_properties(libtreeland PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 
+# PopoverStyle is a singleton
+set_source_files_properties(core/qml/PopoverStyle.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+
 qt_add_qml_module(libtreeland
     URI Treeland
     VERSION "2.0"
@@ -172,10 +177,18 @@ qt_add_qml_module(libtreeland
         $<$<NOT:$<BOOL:${DISABLE_DDM}>>:greeter/usermodel.h>
         idle/idlemanager.cpp
         idle/idlemanager.h
+        input/gesturemanager.cpp
+        input/gesturemanager.h
         input/gestures.cpp
         input/gestures.h
-        input/inputdevice.cpp
-        input/inputdevice.h
+        input/swipegesture.cpp
+        input/swipegesture.h
+        input/holdgesture.cpp
+        input/holdgesture.h
+        input/gesturerecognizer.cpp
+        input/gesturerecognizer.h
+        input/libinputconfig.cpp
+        input/libinputconfig.h
         input/togglablegesture.cpp
         input/togglablegesture.h
         input/compositorinputfilter.cpp
@@ -286,6 +299,7 @@ qt_add_qml_module(libtreeland
         core/qml/TaskWindowPreview.qml
         core/qml/SwitchViewDelegate.qml
         core/qml/SwitchViewHighlightDelegate.qml
+        core/qml/PopoverStyle.qml
         core/qml/DockPreview.qml
         core/qml/FadeBehavior.qml
         core/qml/CaptureSelectorLayer.qml

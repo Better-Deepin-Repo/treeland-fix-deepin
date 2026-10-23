@@ -34,6 +34,7 @@
 #include "modules/keyboard-state-notify/keyboardstatenotifymanagerinterfacev1.h"
 #include "modules/active-notify/activenotifymanagerinterfacev1.h"
 #include "modules/output-manager/outputmanagement.h"
+#include "modules/output-uuid/outputuuidmanagerinterfacev1.h"
 #include "modules/personalization/personalizationmanagerinterfacev1.h"
 #include "modules/appearance/appearanceinterfacev1.h"
 #include "modules/appearance/appearancemanagerinterfacev1.h"
@@ -81,6 +82,7 @@
 #include <wseat.h>
 #include <wsecuritycontextmanager.h>
 #include <wsocket.h>
+#include <ext-background-effect-v1-protocol.h>
 #include <wlr_all.h>
 #include <wxwayland.h>
 #include <wxwaylandsurface.h>
@@ -97,6 +99,7 @@
 
 #define EXT_DATA_CONTROL_MANAGER_V1_VERSION 1
 #define WLR_FRACTIONAL_SCALE_V1_VERSION 1
+#define EXT_BACKGROUND_EFFECT_MANAGER_V1_VERSION 1
 
 static bool rendererSupportsImplicitDmabufFormats(wlr_renderer *renderer)
 {
@@ -525,6 +528,11 @@ void WaylandServer::installCommonProtocols()
     }
 
     wlr_fractional_scale_manager_v1_create(m_server->handle(), WLR_FRACTIONAL_SCALE_V1_VERSION);
+    if (!wlr_ext_background_effect_manager_v1_create(m_server->handle(),
+                                                     EXT_BACKGROUND_EFFECT_MANAGER_V1_VERSION,
+                                                     EXT_BACKGROUND_EFFECT_MANAGER_V1_CAPABILITY_BLUR)) {
+        qCWarning(lcTlCore) << "Failed to create ext-background-effect-manager-v1, blur will be unavailable";
+    }
     wlr_data_control_manager_v1_create(m_server->handle());
     wlr_ext_data_control_manager_v1_create(m_server->handle(), EXT_DATA_CONTROL_MANAGER_V1_VERSION);
     wlr_alpha_modifier_v1_create(m_server->handle());
@@ -750,7 +758,7 @@ void WaylandServer::setCurrentMode(CurrentMode mode)
     if (m_currentMode == mode)
         return;
 
-    setBlockActivateSurface(mode != CurrentMode::Normal);
+    setBlockActivateSurface(mode != CurrentMode::Normal && mode != CurrentMode::Multitaskview);
 
     m_currentMode = mode;
 
@@ -1078,6 +1086,8 @@ WXdgOutputManager *WaylandServer::installDesktopProtocols(QmlEngine *engine)
             &RootSurfaceContainer::primaryOutputChanged,
             outputManagerV1,
             &OutputManagerV1::onPrimaryOutputChanged);
+    server()->attach<OutputUuidManagerV1>();
+    server()->attach<OutputUuidHeadManagerV1>();
     connect(m_rootSurfaceContainer,
             &RootSurfaceContainer::primaryOutputChanged,
             m_sessionManager,
@@ -1229,11 +1239,11 @@ void WaylandServer::installRuntimeProtocols(WXdgOutputManager *xdgOutputManager)
             m_wallpaperManager,
             &WallpaperManager::onWallpaperAdded);
 
-    m_shortcutManager = server()->attach<ShortcutManagerV2>();
+    m_shortcutManager = server()->attach<ShortcutManagerV3>();
     connect(m_treeland,
             &Treeland::Treeland::SessionChanged,
             m_shortcutManager,
-            &ShortcutManagerV2::onSessionChanged);
+            &ShortcutManagerV3::onSessionChanged);
     m_shortcutManager->onSessionChanged();
     auto shortcutControl = m_shortcutManager->controller();
     auto *shortcutRunner = new ShortcutRunner(shortcutControl);
