@@ -1,4 +1,4 @@
-treeland (0.11.0) unstable; urgency=medium
+treeland (0.11.0.15) unstable; urgency=medium
 
   * fix(treeland-debug): fall back to the compositor runtime directory when
     the global debug socket directory is not writable
