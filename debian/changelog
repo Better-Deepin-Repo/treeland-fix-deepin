@@ -1,4 +1,4 @@
-treeland (0.12.0) unstable; urgency=medium
+treeland (0.12.0.2) unstable; urgency=medium
 
   * test(foreign-toplevel): disable geometry animation in protocol test
   * feat(dockpreview): take the preview radii from DTK's menu and
