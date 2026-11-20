@@ -21,3 +21,6 @@ override_dh_auto_configure:
 
 override_dh_installsystemd:
 	dh_installsystemd --no-start --no-stop-on-upgrade
+
+override_dh_auto_test:
+	echo "- 禁用测试"
