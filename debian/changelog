@@ -1,4 +1,4 @@
-treeland (0.12.1) unstable; urgency=medium
+treeland (0.12.1.2) unstable; urgency=medium
 
   * feat(build): migrate wlroots to the dde-wlroots static package and add
     FetchContent source builds via TREELAND_FETCH_DDE_WLROOTS
